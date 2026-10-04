@@ -1,0 +1,14 @@
+{
+  "name": "apuracao-2026-front",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": { "dev": "vite", "build": "vite build", "preview": "vite preview" },
+  "dependencies": {
+    "d3-geo": "^3.1.1",
+    "echarts": "^5.5.1",
+    "pinia": "^2.2.6",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": { "@vitejs/plugin-vue": "^5.2.1", "vite": "^6.0.0" }
+}

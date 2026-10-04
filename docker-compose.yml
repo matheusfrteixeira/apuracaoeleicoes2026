@@ -1,0 +1,37 @@
+# docker compose up --build   ->  http://localhost:8080
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]   # dados efêmeros: o TSE é a fonte da verdade
+
+  api:                       # só serve REST + WebSocket (escale com --scale api=N)
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      INGEST_EMBEDDED: "false"
+      DATA_MODE: ${DATA_MODE:-tse}
+    depends_on: [redis]
+
+  worker:                    # UM único worker busca no TSE e publica no Redis
+    build: ./backend
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATA_MODE: ${DATA_MODE:-tse}
+      POLL_SECONDS: ${POLL_SECONDS:-300}
+      TSE_BASE: ${TSE_BASE:-https://resultados.tse.jus.br/oficial/ele2026/6259/dados}
+      TSE_ELE_FED: ${TSE_ELE_FED:-6257}
+      TSE_ELE_EST: ${TSE_ELE_EST:-6259}
+      TSE_FETCH_MUNICIPALITIES: ${TSE_FETCH_MUNICIPALITIES:-true}
+      TSE_FETCH_OTHER_UFS: ${TSE_FETCH_OTHER_UFS:-false}
+    depends_on: [redis]
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports: ["8080:80"]
+    depends_on: [api]
+
