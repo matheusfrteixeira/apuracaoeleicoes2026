@@ -34,4 +34,12 @@ services:
     restart: unless-stopped
     ports: ["8080:80"]
     depends_on: [api]
+    networks:
+      - default
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
+
 
